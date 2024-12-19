@@ -10,19 +10,23 @@ using System.Threading;
 
 namespace Client
 {
-    public class Program
+    class Program
     {
         static IPAddress ServerIPAddress;
         static int ServerPort;
+
         static string ClientToken;
         static DateTime ClientDateConnection;
+
         static void Main(string[] args)
         {
             OnSettings();
+
             Thread tCheckToken = new Thread(CheckToken);
             tCheckToken.Start();
             while (true) SetCommand();
         }
+
         static void OnSettings()
         {
             string Path = Directory.GetCurrentDirectory() + "/.config";
@@ -50,6 +54,7 @@ namespace Client
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("To change, write the command: /config");
         }
+
         static void SetCommand()
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -57,13 +62,64 @@ namespace Client
             switch (Command)
             {
                 case "/config": File.Delete(Directory.GetCurrentDirectory() + "/.config"); OnSettings(); break;
-                case "/connect": ConnectServer(); break;
+                case "/connect": AuthenticateUser(); break;
                 case "/status": GetStatus(); break;
                 case "/help": Help(); break;
             }
         }
 
-        
+        static void AuthenticateUser()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("Enter your username: ");
+            string username = Console.ReadLine();
+            Console.Write("Enter your password: ");
+            string password = Console.ReadLine();
+            ConnectServer(username, password);
+        }
+
+        static void ConnectServer(string username, string password)
+        {
+            IPEndPoint EndPoint = new IPEndPoint(ServerIPAddress, ServerPort);
+            Socket Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                Socket.Connect(EndPoint);
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error: " + ex.Message);
+                return;
+            }
+            if (Socket.Connected)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Connection to server successful");
+                string authCommand = $"/auth {username} {password}";
+                Socket.Send(Encoding.UTF8.GetBytes(authCommand));
+                byte[] bytes = new byte[10485760];
+                int byteRec = Socket.Receive(bytes);
+                string Response = Encoding.UTF8.GetString(bytes, 0, byteRec);
+                if (Response == "/auth_failed")
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Authentication failed. Invalid username or password.");
+                }
+                else if (Response == "/blacklist")
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("You are in the blacklist. Connection denied.");
+                }
+                else
+                {
+                    ClientToken = Response;
+                    ClientDateConnection = DateTime.Now;
+                    Console.WriteLine($"Received connection token: {ClientToken}");
+                }
+            }
+        }
+
         static void CheckToken()
         {
             while (true)
@@ -98,12 +154,14 @@ namespace Client
                 Thread.Sleep(1000);
             }
         }
+
         static void GetStatus()
         {
             int Duration = (int)DateTime.Now.Subtract(ClientDateConnection).TotalSeconds;
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine($"Client: {ClientToken}, time connection: {ClientDateConnection.ToString("HH:mm:ss dd.MM")}, duration: {Duration}");
         }
+
         static void Help()
         {
             Console.ForegroundColor = ConsoleColor.White;
@@ -121,6 +179,5 @@ namespace Client
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("  - show list users");
         }
-
     }
 }
