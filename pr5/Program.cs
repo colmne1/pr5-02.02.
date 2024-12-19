@@ -4,8 +4,10 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.IO;
 using System.Net.Sockets;
+
 namespace pr5
 {
     public class Program
@@ -18,7 +20,30 @@ namespace pr5
         static void Main(string[] args)
         {
             OnSettings();
+            Thread tListner = new Thread(ConnectServer);
+            tListner.Start();
+            Thread tDisconnect = new Thread(DisconnectClient);
+            tDisconnect.Start();
+            while (true) SetCommand();
         }
+        static void DisconnectClient() 
+        {
+            while (true)
+            {
+                for (int i = 0; i < AllClients.Count; i++)
+                {
+                    int ClientDuration = (int)DateTime.Now.Subtract(AllClients[i].DateConnect).TotalSeconds;
+                    if (ClientDuration > Duration)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Client: {AllClients[i].Token} disconnect from server due to timeout");
+                        AllClients.RemoveAt(i);
+                    }
+                }
+                Thread.Sleep(1000);
+            }
+        }
+
         static void Help()
         {
             Console.ForegroundColor = ConsoleColor.White;
