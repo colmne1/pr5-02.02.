@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.IO;
+using System.Threading;
 
 namespace Client
 {
@@ -17,6 +18,9 @@ namespace Client
         static void Main(string[] args)
         {
             OnSettings();
+            Thread tCheckToken = new Thread(CheckToken);
+            tCheckToken.Start();
+            while (true) SetCommand();
         }
         static void OnSettings()
         {
@@ -45,4 +49,17 @@ namespace Client
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("To change, write the command: /config");
         }
+        static void SetCommand()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            string Command = Console.ReadLine();
+            switch (Command)
+            {
+                case "/config": File.Delete(Directory.GetCurrentDirectory() + "/.config"); OnSettings(); break;
+                case "/connect": ConnectServer(); break;
+                case "/status": GetStatus(); break;
+                case "/help": Help(); break;
+            }
+        }
+    }
 }
