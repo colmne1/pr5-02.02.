@@ -62,6 +62,8 @@ namespace Client
                 case "/help": Help(); break;
             }
         }
+
+        
         static void CheckToken()
         {
             while (true)
@@ -119,5 +121,6 @@ namespace Client
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("  - show list users");
         }
+
     }
 }
