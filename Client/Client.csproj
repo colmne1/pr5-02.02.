@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2ABAF4C1-E90A-45FB-A0EB-CCF0940431B1}</ProjectGuid>
+    <ProjectGuid>{30F6374F-8F03-40F5-8BC0-948B0D5C59F4}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>pr5</RootNamespace>
-    <AssemblyName>pr5</AssemblyName>
+    <RootNamespace>Client</RootNamespace>
+    <AssemblyName>Client</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -95,10 +95,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Context.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Client.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
